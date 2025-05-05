@@ -1,6 +1,8 @@
 import React from 'react'
 import Image from "next/image";
 
+export const dynamic = 'force-dynamic';
+
 const Home = () => {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center -mt-16">

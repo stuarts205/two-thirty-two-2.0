@@ -1,5 +1,4 @@
-import { date } from "drizzle-orm/mysql-core";
-import { pgTable, uuid, text, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text } from "drizzle-orm/pg-core";
 import {
   createInsertSchema,
   createSelectSchema,

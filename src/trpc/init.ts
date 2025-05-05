@@ -1,7 +1,5 @@
-import { db } from "@/db";
-import { initTRPC, TRPCError } from "@trpc/server";
+import { initTRPC } from "@trpc/server";
 import { cache } from "react";
-import { eq } from "drizzle-orm";
 
 export const createTRPCContext = cache(async () => {  
   return { };

@@ -1,6 +1,4 @@
-import { useIsMobile } from "@/hooks/use-mobile";
 import React from "react";
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "./ui/drawer";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 
 interface ResponsiveModalProps {

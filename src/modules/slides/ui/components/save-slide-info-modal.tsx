@@ -8,7 +8,7 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { trpc } from '@/trpc/client'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import { z } from 'zod'
 import { Textarea } from '@/components/ui/textarea'
 import { useForm } from 'react-hook-form'
