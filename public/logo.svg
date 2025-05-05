@@ -1,0 +1,26 @@
+<svg width="200" height="150" viewBox="0 0 200 150" xmlns="http://www.w3.org/2000/svg">
+  <!-- Projector Body -->
+  <rect x="30" y="40" width="140" height="70" rx="10" ry="10" fill="#444" stroke="#222" stroke-width="3"/>
+  
+  <!-- Lens Housing -->
+  <circle cx="100" cy="75" r="22" fill="#222" stroke="#000" stroke-width="2"/>
+  <circle cx="100" cy="75" r="12" fill="#666" stroke="#ccc" stroke-width="2"/>
+  <circle cx="100" cy="75" r="6" fill="#333"/>
+
+  <!-- Air Vents -->
+  <rect x="40" y="50" width="10" height="2" fill="#999"/>
+  <rect x="40" y="55" width="10" height="2" fill="#999"/>
+  <rect x="40" y="60" width="10" height="2" fill="#999"/>
+  <rect x="40" y="65" width="10" height="2" fill="#999"/>
+
+  <!-- Slide Tray Slot -->
+  <rect x="150" y="45" width="8" height="60" fill="#222" stroke="#000" stroke-width="1"/>
+  <rect x="153" y="50" width="2" height="50" fill="#888"/>
+  
+  <!-- Feet -->
+  <rect x="40" y="110" width="10" height="8" fill="#222"/>
+  <rect x="150" y="110" width="10" height="8" fill="#222"/>
+
+  <!-- Label Plate -->
+  <rect x="80" y="95" width="40" height="10" fill="#ccc" rx="2"/>
+</svg>
