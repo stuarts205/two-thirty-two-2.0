@@ -18,8 +18,9 @@ import { z } from "zod";
 export const slidesRouter = createTRPCRouter({
   getOne: baseProcedure
     .input(z.object({ image: z.string() }))
-    .query(async ({ input }) => {
-      const { image } = input;
+    .query(async ({ input }) => {      
+      const image = input.image;
+      console.log("imagename", image);
       const [existingSlide] = await db
         .select()
         .from(slides)
@@ -98,20 +99,17 @@ export const slidesRouter = createTRPCRouter({
 
       return slide;
     }),
-    update: baseProcedure
+  update: baseProcedure
     .input(z.object({ ...slideUpdateSchema.shape, image: z.string() }))
     .mutation(async ({ input }) => {
-
       const updatedSlide = await db
         .update(slides)
-        .set(
-          {
-            title: input.title,
-            description: input.description,
-            people: input.people,
-            approxDate: input.approxDate,
-          }
-        )
+        .set({
+          title: input.title,
+          description: input.description,
+          people: input.people,
+          approxDate: input.approxDate,
+        })
         .where(eq(slides.slidename, input.image))
         .returning()
         .execute();

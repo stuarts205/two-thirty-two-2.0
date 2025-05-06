@@ -41,7 +41,7 @@ export const SlideSectionSuspense = ({ box, cube }: SlideSectionProps) => {
 
   const create = trpc.slides.create.useMutation({ 
     onSuccess: () => {
-      toast.success("Video created");
+      toast.success("Slide created");
     },
     onError: () => {
       toast.error("Something went wrong");
@@ -81,6 +81,7 @@ export const SlideSectionSuspense = ({ box, cube }: SlideSectionProps) => {
   };
 
   const viewImage = (image: string, index: number) => {
+    console.log("image", image);
     if (!open) {
       setData({ image: "", index: 0 });
     }
@@ -95,17 +96,15 @@ export const SlideSectionSuspense = ({ box, cube }: SlideSectionProps) => {
     create.mutate({ image })
   }
 
-  console.log("imageUrl", imageUrl);
-
   return (
     <>
-    {imageUrl && (
+    {/* {imageUrl && (
       <SaveSlideInfoModal
       open={slideInfoModalOpen}
       onOpenChange={setSlideInfoModalOpen}
       image={imageUrl}
     />
-    )}      
+    )}       */}
       <div className="flex flex-col gap-y-2 w-full">
         <div className="fixed py-2 px-4 bg-white z-20 w-full">
           <div className="flex gap-y-2 w-full items-center gap-6">
@@ -160,7 +159,7 @@ export const SlideSectionSuspense = ({ box, cube }: SlideSectionProps) => {
                       className="rounded-xl overflow-hidden group cursor-pointer hover:opacity-75"
                       onClick={() => viewImage(image.url, index)}
                     />
-                    <DropdownMenu>
+                    {/* <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button
                           type="button"
@@ -179,7 +178,7 @@ export const SlideSectionSuspense = ({ box, cube }: SlideSectionProps) => {
                           Add/Update info
                         </DropdownMenuItem>
                       </DropdownMenuContent>
-                    </DropdownMenu>
+                    </DropdownMenu> */}
                   </div>
                 ))}
               </Masonry>
