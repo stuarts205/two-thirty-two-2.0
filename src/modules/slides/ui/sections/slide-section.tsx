@@ -81,13 +81,12 @@ export const SlideSectionSuspense = ({ box, cube }: SlideSectionProps) => {
   };
 
   const viewImage = (image: string, index: number) => {
-    console.log("image", image);
     if (!open) {
       setData({ image: "", index: 0 });
     }
     setOpen(true);
     setData({ image, index });
-    setImageUrl(image);
+    //setImageUrl(image);
   };
 
   const openModal = (image: string) => {
@@ -98,13 +97,18 @@ export const SlideSectionSuspense = ({ box, cube }: SlideSectionProps) => {
 
   return (
     <>
-    {/* {imageUrl && (
+    {/* {!imageUrl && (
       <SaveSlideInfoModal
       open={slideInfoModalOpen}
       onOpenChange={setSlideInfoModalOpen}
       image={imageUrl}
     />
-    )}       */}
+    )}  */} 
+    <SaveSlideInfoModal
+      open={slideInfoModalOpen}
+      onOpenChange={setSlideInfoModalOpen}
+      image={imageUrl}
+    />  
       <div className="flex flex-col gap-y-2 w-full">
         <div className="fixed py-2 px-4 bg-white z-20 w-full">
           <div className="flex gap-y-2 w-full items-center gap-6">
@@ -159,12 +163,12 @@ export const SlideSectionSuspense = ({ box, cube }: SlideSectionProps) => {
                       className="rounded-xl overflow-hidden group cursor-pointer hover:opacity-75"
                       onClick={() => viewImage(image.url, index)}
                     />
-                    {/* <DropdownMenu>
+                    <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button
                           type="button"
                           size="icon"
-                          className="bg-black/50 hover:bg-black/50 absolute top-1 right-1 rounded-full 
+                          className="bg-black/50 hover:bg-black/50 absolute top-1 right-1 rounded-full opacity-70 md:opacity-0 transition-opacity  
                               group-hover:opacity-100 duration-300 size-7"
                         >
                           <MoreVerticalIcon className="text-white" />
@@ -178,7 +182,7 @@ export const SlideSectionSuspense = ({ box, cube }: SlideSectionProps) => {
                           Add/Update info
                         </DropdownMenuItem>
                       </DropdownMenuContent>
-                    </DropdownMenu> */}
+                    </DropdownMenu>
                   </div>
                 ))}
               </Masonry>

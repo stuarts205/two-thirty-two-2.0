@@ -25,7 +25,7 @@ interface SlideinfoModalProps {
     onOpenChange: (open: boolean) => void
 }
 
-const SaveSlideInfoModal = ({image, open, onOpenChange}:SlideinfoModalProps) => {  
+const SaveSlideInfoModal = ({image, open, onOpenChange}:SlideinfoModalProps) => {
   const [slide] = trpc.slides.getOne.useSuspenseQuery({ image }); 
 
   const form = useForm<z.infer<typeof slideUpdateSchema>>({

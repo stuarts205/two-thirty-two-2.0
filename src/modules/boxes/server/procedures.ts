@@ -45,7 +45,6 @@ export const boxesRouter = createTRPCRouter({
     .query(async ({ input }) => {
       let cubes = Array();
       const name = input.box.slice(input.box.lastIndexOf('/') + 1).replaceAll('%20', ' ').replaceAll('%20', ' ')  
-      console.log(input.box);
       const s3Client = new S3Client({
         region: process.env.AWS_REGION || "",
         credentials: {

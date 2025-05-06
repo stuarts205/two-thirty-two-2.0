@@ -19,8 +19,10 @@ export const slidesRouter = createTRPCRouter({
   getOne: baseProcedure
     .input(z.object({ image: z.string() }))
     .query(async ({ input }) => {      
+      if(!input.image) {
+        return null;
+      }
       const image = input.image;
-      console.log("imagename", image);
       const [existingSlide] = await db
         .select()
         .from(slides)
