@@ -17,10 +17,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import {
-  ImagePlusIcon,
-  MoreVerticalIcon,
-} from "lucide-react";
+import { ChevronsRightIcon, ImagePlusIcon, MoreVerticalIcon } from "lucide-react";
 import SaveSlideInfoModal from "../components/save-slide-info-modal";
 import { toast } from "sonner";
 
@@ -39,7 +36,7 @@ export const SlideSectionSuspense = ({ box, cube }: SlideSectionProps) => {
   const [imageUrl, setImageUrl] = useState<string>("");
   const [slideInfoModalOpen, setSlideInfoModalOpen] = useState(false);
 
-  const create = trpc.slides.create.useMutation({ 
+  const create = trpc.slides.create.useMutation({
     onSuccess: () => {
       toast.success("Slide created");
     },
@@ -71,7 +68,7 @@ export const SlideSectionSuspense = ({ box, cube }: SlideSectionProps) => {
   const getScaledStyle = (w: number, h: number) => {
     const vw = window.innerWidth;
     const vh = window.innerHeight;
-    const maxDisplaySize = Math.min(vw, vh) * 0.5; // 50% of the smaller screen dimension
+    const maxDisplaySize = Math.min(vw, vh) * 0.5; 
     const scale = maxDisplaySize / Math.max(w, h);
 
     return {
@@ -86,38 +83,31 @@ export const SlideSectionSuspense = ({ box, cube }: SlideSectionProps) => {
     }
     setOpen(true);
     setData({ image, index });
-    //setImageUrl(image);
   };
 
   const openModal = (image: string) => {
     setImageUrl(image);
     setSlideInfoModalOpen(true);
-    create.mutate({ image })
-  }
+    create.mutate({ image });
+  };
 
   return (
     <>
-    {/* {!imageUrl && (
       <SaveSlideInfoModal
-      open={slideInfoModalOpen}
-      onOpenChange={setSlideInfoModalOpen}
-      image={imageUrl}
-    />
-    )}  */} 
-    <SaveSlideInfoModal
-      open={slideInfoModalOpen}
-      onOpenChange={setSlideInfoModalOpen}
-      image={imageUrl}
-    />  
-      <div className="flex flex-col gap-y-2 w-full">
-        <div className="fixed py-2 px-4 bg-white z-20 w-full">
-          <div className="flex gap-y-2 w-full items-center gap-6">
-            <p className="text-lg text-muted-foreground">{box}</p>
-            <p className="text-lg text-muted-foreground">{cube}</p>
-          </div>
+        open={slideInfoModalOpen}
+        onOpenChange={setSlideInfoModalOpen}
+        image={imageUrl}
+      />
+      <div className="flex flex-col w-full gap-y-4">
+        <div className="flex gap-y-2 w-full items-center gap-6">
+          <p className="text-lg text-muted-foreground">{box}</p>
+          <ChevronsRightIcon className="text-muted-foreground size-4" />
+          <p className="text-lg text-muted-foreground">{cube}</p>
         </div>
-        <div className="flex flex-col gap-y-2 w-full mt-16">
+        <div>
           <Separator />
+        </div>
+        <div className="flex flex-col w-full">          
           {imageSizes.length > 0 && (
             <Lightbox
               plugins={[Counter, Slideshow]}
@@ -175,9 +165,7 @@ export const SlideSectionSuspense = ({ box, cube }: SlideSectionProps) => {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" side="right">
-                        <DropdownMenuItem
-                          onClick={() => openModal(image.url)}
-                        >
+                        <DropdownMenuItem onClick={() => openModal(image.url)}>
                           <ImagePlusIcon className="size-4 mr-1" />
                           Add/Update info
                         </DropdownMenuItem>
