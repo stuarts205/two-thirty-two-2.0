@@ -4,20 +4,28 @@ import { Skeleton } from "@/components/ui/skeleton";
 import React, { Suspense, useEffect, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { trpc } from "@/trpc/client";
+import { useRouter } from "next/navigation";
 import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 import Counter from "yet-another-react-lightbox/plugins/counter";
 import "yet-another-react-lightbox/plugins/counter.css";
 import Slideshow from "yet-another-react-lightbox/plugins/slideshow";
-import { DropdownMenu } from "@radix-ui/react-dropdown-menu";
 import {
+  DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { ChevronsRightIcon, ImagePlusIcon, MoreVerticalIcon } from "lucide-react";
+import {
+  ChevronDownIcon,
+  ChevronsRightIcon,
+  ImagePlusIcon,
+  MoreVerticalIcon,
+} from "lucide-react";
 import SaveSlideInfoModal from "../components/save-slide-info-modal";
 import { toast } from "sonner";
 
@@ -27,7 +35,11 @@ interface SlideSectionProps {
 }
 
 export const SlideSectionSuspense = ({ box, cube }: SlideSectionProps) => {
+  const router = useRouter();
+  const utils = trpc.useUtils();
+
   const [slides] = trpc.slides.getSlides.useSuspenseQuery({ box, cube });
+  const { data: boxes = [] } = trpc.boxes.getBoxes.useQuery();
   const [data, setData] = useState({ image: "", index: 0 });
   const [open, setOpen] = useState(false);
   const [imageSizes, setImageSizes] = useState<
@@ -35,15 +47,13 @@ export const SlideSectionSuspense = ({ box, cube }: SlideSectionProps) => {
   >([]);
   const [imageUrl, setImageUrl] = useState<string>("");
   const [slideInfoModalOpen, setSlideInfoModalOpen] = useState(false);
+  const [selectedBox, setSelectedBox] = useState(box);
+  const [selectedCube, setSelectedCube] = useState(cube);
 
-  const create = trpc.slides.create.useMutation({
-    onSuccess: () => {
-      toast.success("Slide created");
-    },
-    onError: () => {
-      toast.error("Something went wrong");
-    },
-  });
+  const { data: cubes = [] } = trpc.boxes.getCubes.useQuery(
+    { box: selectedBox },
+    { enabled: !!selectedBox },
+  );
 
   useEffect(() => {
     const loadImages = async () => {
@@ -56,8 +66,8 @@ export const SlideSectionSuspense = ({ box, cube }: SlideSectionProps) => {
               img.onload = () => {
                 resolve({ width: img.naturalWidth, height: img.naturalHeight });
               };
-            })
-        )
+            }),
+        ),
       );
       setImageSizes(sizes);
     };
@@ -65,10 +75,15 @@ export const SlideSectionSuspense = ({ box, cube }: SlideSectionProps) => {
     loadImages();
   }, [slides]);
 
+  useEffect(() => {
+    setSelectedBox(box);
+    setSelectedCube(cube);
+  }, [box, cube]);
+
   const getScaledStyle = (w: number, h: number) => {
     const vw = window.innerWidth;
     const vh = window.innerHeight;
-    const maxDisplaySize = Math.min(vw, vh) * 0.5; 
+    const maxDisplaySize = Math.min(vw, vh) * 0.5;
     const scale = maxDisplaySize / Math.max(w, h);
 
     return {
@@ -88,7 +103,33 @@ export const SlideSectionSuspense = ({ box, cube }: SlideSectionProps) => {
   const openModal = (image: string) => {
     setImageUrl(image);
     setSlideInfoModalOpen(true);
-    create.mutate({ image });
+  };
+
+  const navigateToSlideRoute = (nextBox: string, nextCube: string) => {
+    router.push(
+      `/slides/${encodeURIComponent(nextBox)}_${encodeURIComponent(nextCube)}`,
+    );
+  };
+
+  const onSelectBox = async (nextBox: string) => {
+    setSelectedBox(nextBox);
+
+    const nextCubes = await utils.boxes.getCubes.fetch({ box: nextBox });
+    const hasCurrentCube = nextCubes.some((item) => item.id === selectedCube);
+    const nextCube = hasCurrentCube ? selectedCube : nextCubes[0]?.id;
+
+    if (!nextCube) {
+      toast.error("No cubes found for this box");
+      return;
+    }
+
+    setSelectedCube(nextCube);
+    navigateToSlideRoute(nextBox, nextCube);
+  };
+
+  const onSelectCube = (nextCube: string) => {
+    setSelectedCube(nextCube);
+    navigateToSlideRoute(selectedBox, nextCube);
   };
 
   return (
@@ -99,15 +140,61 @@ export const SlideSectionSuspense = ({ box, cube }: SlideSectionProps) => {
         image={imageUrl}
       />
       <div className="flex flex-col w-full gap-y-4">
-        <div className="flex gap-y-2 w-full items-center gap-6">
-          <p className="text-lg text-muted-foreground">{box}</p>
+        <div className="flex gap-y-2 w-full items-center gap-6 px-5">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                type="button"
+                variant="ghost"
+                className="h-auto p-0 text-lg text-muted-foreground hover:bg-transparent hover:text-foreground"
+              >
+                <span>{selectedBox}</span>
+                <ChevronDownIcon className="size-4 ml-1" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start">
+              <DropdownMenuLabel>Select box</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {boxes.map((item) => (
+                <DropdownMenuItem
+                  key={item.id}
+                  onClick={() => onSelectBox(item.title)}
+                >
+                  {item.title}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
           <ChevronsRightIcon className="text-muted-foreground size-4" />
-          <p className="text-lg text-muted-foreground">{cube}</p>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                type="button"
+                variant="ghost"
+                className="h-auto p-0 text-lg text-muted-foreground hover:bg-transparent hover:text-foreground"
+              >
+                <span>{selectedCube}</span>
+                <ChevronDownIcon className="size-4 ml-1" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start">
+              <DropdownMenuLabel>Select cube</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {cubes.map((item) => (
+                <DropdownMenuItem
+                  key={item.id}
+                  onClick={() => onSelectCube(item.id)}
+                >
+                  {item.id}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
         <div>
           <Separator />
         </div>
-        <div className="flex flex-col w-full">          
+        <div className="flex flex-col w-full">
           {imageSizes.length > 0 && (
             <Lightbox
               plugins={[Counter, Slideshow]}
@@ -126,7 +213,7 @@ export const SlideSectionSuspense = ({ box, cube }: SlideSectionProps) => {
                 height: imageSizes[index].height,
                 style: getScaledStyle(
                   imageSizes[index].width,
-                  imageSizes[index].height
+                  imageSizes[index].height,
                 ),
                 srcSet: [
                   {
