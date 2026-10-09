@@ -20,6 +20,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <script
+        defer
+        data-website-id="18b18dbe-c773-40da-8b4d-b09e5c5b098e"
+        data-domain="https://twothirtytwo.net"
+        src="https://webtracking.io/analytics.js"
+      ></script>
       <body className={inter.className}>
         <SidebarProvider>
           <TRPCProvider>{children}</TRPCProvider>
