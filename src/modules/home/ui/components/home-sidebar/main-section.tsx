@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/sidebar";
 import { trpc } from "@/trpc/client";
 import { HomeIcon, ImageIcon, VideoIcon } from "lucide-react";
+import Link from "next/link";
 import React, { useState } from "react";
 import BoxItem from "./box-items";
 import { videos } from "@/lib/lookups";
@@ -53,13 +54,24 @@ const MainSection = () => {
                   asChild
                   isActive={activeMenu === item.title}
                 >
-                  <div
-                    className="flex items-center gap-4 cursor-pointer"
-                    onClick={() => setActiveMenu(item.title)}
-                  >
-                    <item.icon />
-                    <span className="text-sm">{item.title}</span>
-                  </div>
+                  {item.title === "Home" ? (
+                    <Link
+                      href={item.url}
+                      className="flex items-center gap-4 cursor-pointer"
+                      onClick={() => setActiveMenu(item.title)}
+                    >
+                      <item.icon />
+                      <span className="text-sm">{item.title}</span>
+                    </Link>
+                  ) : (
+                    <div
+                      className="flex items-center gap-4 cursor-pointer"
+                      onClick={() => setActiveMenu(item.title)}
+                    >
+                      <item.icon />
+                      <span className="text-sm">{item.title}</span>
+                    </div>
+                  )}
                 </SidebarMenuButton>
               </SidebarMenuItem>
             ))}
@@ -87,9 +99,7 @@ const MainSection = () => {
               <SidebarContent>
                 <SidebarMenu className="w-full py-2 mb-12 gap-2">
                   {videoList.map((video) => (
-                    <SidebarMenuItem
-                      key={video.linkId}
-                    >
+                    <SidebarMenuItem key={video.linkId}>
                       <VideoItems video={video} />
                     </SidebarMenuItem>
                   ))}

@@ -5,11 +5,10 @@ import React, { Suspense, useEffect, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { trpc } from "@/trpc/client";
 import { useRouter } from "next/navigation";
-import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
+import dynamic from "next/dynamic";
+import Masonry from "react-responsive-masonry";
 import Lightbox from "yet-another-react-lightbox";
-import "yet-another-react-lightbox/styles.css";
 import Counter from "yet-another-react-lightbox/plugins/counter";
-import "yet-another-react-lightbox/plugins/counter.css";
 import Slideshow from "yet-another-react-lightbox/plugins/slideshow";
 import {
   DropdownMenu,
@@ -29,17 +28,55 @@ import {
 import SaveSlideInfoModal from "../components/save-slide-info-modal";
 import { toast } from "sonner";
 
+const ResponsiveMasonry = dynamic(
+  () =>
+    import("react-responsive-masonry").then(
+      (module) => module.ResponsiveMasonry,
+    ),
+  { ssr: false },
+);
+
 interface SlideSectionProps {
   box: string;
   cube: string;
+  searchQuery?: string;
+}
+
+interface SlideGalleryProps extends SlideSectionProps {
+  slides: { key?: string; url: string }[];
 }
 
 export const SlideSectionSuspense = ({ box, cube }: SlideSectionProps) => {
+  const [slides] = trpc.slides.getSlides.useSuspenseQuery({ box, cube });
+
+  return <SlideGallery box={box} cube={cube} slides={slides ?? []} />;
+};
+
+const SearchSlideSectionSuspense = ({ query }: { query: string }) => {
+  const [results] = trpc.slides.search.useSuspenseQuery({ query });
+
+  return (
+    <SlideGallery
+      box=""
+      cube=""
+      searchQuery={query}
+      slides={results.map((slide) => ({ key: slide.id, url: slide.slidename }))}
+    />
+  );
+};
+
+const SlideGallery = ({
+  box,
+  cube,
+  slides,
+  searchQuery,
+}: SlideGalleryProps) => {
   const router = useRouter();
   const utils = trpc.useUtils();
 
-  const [slides] = trpc.slides.getSlides.useSuspenseQuery({ box, cube });
-  const { data: boxes = [] } = trpc.boxes.getBoxes.useQuery();
+  const { data: boxes = [] } = trpc.boxes.getBoxes.useQuery(undefined, {
+    enabled: !searchQuery,
+  });
   const [data, setData] = useState({ image: "", index: 0 });
   const [open, setOpen] = useState(false);
   const [imageSizes, setImageSizes] = useState<
@@ -140,57 +177,70 @@ export const SlideSectionSuspense = ({ box, cube }: SlideSectionProps) => {
         image={imageUrl}
       />
       <div className="flex flex-col w-full gap-y-4">
-        <div className="flex gap-y-2 w-full items-center gap-6 px-5">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                type="button"
-                variant="ghost"
-                className="h-auto p-0 text-lg text-muted-foreground hover:bg-transparent hover:text-foreground"
-              >
-                <span>{selectedBox}</span>
-                <ChevronDownIcon className="size-4 ml-1" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start">
-              <DropdownMenuLabel>Select box</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {boxes.map((item) => (
-                <DropdownMenuItem
-                  key={item.id}
-                  onClick={() => onSelectBox(item.title)}
+        {searchQuery ? (
+          <div className="px-5 space-y-1">
+            <h1 className="text-lg font-medium break-words">
+              Search results for &quot;{searchQuery}&quot;
+            </h1>
+            <p role="status" className="text-sm text-muted-foreground">
+              {slides.length === 50
+                ? "First 50 matching slides"
+                : `${slides.length} matching slides`}
+            </p>
+          </div>
+        ) : (
+          <div className="flex gap-y-2 w-full items-center gap-6 px-5">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="h-auto p-0 text-lg text-muted-foreground hover:bg-transparent hover:text-foreground"
                 >
-                  {item.title}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <ChevronsRightIcon className="text-muted-foreground size-4" />
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                type="button"
-                variant="ghost"
-                className="h-auto p-0 text-lg text-muted-foreground hover:bg-transparent hover:text-foreground"
-              >
-                <span>{selectedCube}</span>
-                <ChevronDownIcon className="size-4 ml-1" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start">
-              <DropdownMenuLabel>Select cube</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {cubes.map((item) => (
-                <DropdownMenuItem
-                  key={item.id}
-                  onClick={() => onSelectCube(item.id)}
+                  <span>{selectedBox}</span>
+                  <ChevronDownIcon className="size-4 ml-1" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start">
+                <DropdownMenuLabel>Select box</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {boxes.map((item) => (
+                  <DropdownMenuItem
+                    key={item.id}
+                    onClick={() => onSelectBox(item.title)}
+                  >
+                    {item.title}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <ChevronsRightIcon className="text-muted-foreground size-4" />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="h-auto p-0 text-lg text-muted-foreground hover:bg-transparent hover:text-foreground"
                 >
-                  {item.id}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+                  <span>{selectedCube}</span>
+                  <ChevronDownIcon className="size-4 ml-1" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start">
+                <DropdownMenuLabel>Select cube</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {cubes.map((item) => (
+                  <DropdownMenuItem
+                    key={item.id}
+                    onClick={() => onSelectCube(item.id)}
+                  >
+                    {item.id}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        )}
         <div>
           <Separator />
         </div>
@@ -226,6 +276,11 @@ export const SlideSectionSuspense = ({ box, cube }: SlideSectionProps) => {
             />
           )}
           <div className="p-5">
+            {searchQuery && slides.length === 0 && (
+              <p className="text-sm text-muted-foreground">
+                No matching slides found.
+              </p>
+            )}
             <ResponsiveMasonry
               columnsCountBreakPoints={{ 350: 3, 750: 4, 900: 5, 1300: 6 }}
             >
@@ -278,11 +333,18 @@ const SlideSectionSkeletion = () => {
   );
 };
 
-const SlideSection = ({ box, cube }: SlideSectionProps) => {
+const SlideSection = ({ box, cube, searchQuery }: SlideSectionProps) => {
   return (
     <Suspense fallback={<SlideSectionSkeletion />}>
-      <ErrorBoundary fallback={<p>Error</p>}>
-        <SlideSectionSuspense box={box} cube={cube} />
+      <ErrorBoundary
+        key={searchQuery || `${box}/${cube}`}
+        fallback={<p>Error</p>}
+      >
+        {searchQuery ? (
+          <SearchSlideSectionSuspense query={searchQuery} />
+        ) : (
+          <SlideSectionSuspense box={box} cube={cube} />
+        )}
       </ErrorBoundary>
     </Suspense>
   );

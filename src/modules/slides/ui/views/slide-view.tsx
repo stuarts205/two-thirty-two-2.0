@@ -1,17 +1,21 @@
 "use client";
 import React from "react";
 import SlideSection from "../sections/slide-section";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 
 const SlideView = () => {
   const params = useParams();
+  const searchParams = useSearchParams();
   const boxcube = params?.boxCubeId || "";
+  const searchQuery =
+    boxcube === "search" ? searchParams.get("query")?.trim() : undefined;
   const box = typeof boxcube === "string" ? boxcube.split("_")[0] : "";
-  const cube = typeof boxcube === "string" ? boxcube.split("_")[1] : "";
+  const cube = typeof boxcube === "string" ? (boxcube.split("_")[1] ?? "") : "";
 
   return (
     <div>
       <SlideSection
+        searchQuery={searchQuery}
         box={box
           .slice(box.lastIndexOf("/") + 1)
           .replaceAll("%20", " ")

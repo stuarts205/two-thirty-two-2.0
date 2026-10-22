@@ -3,10 +3,43 @@ import { slides, slideUpdateSchema } from "@/db/schema";
 import { baseProcedure, createTRPCRouter } from "@/trpc/init";
 import { S3Client, ListObjectsV2Command } from "@aws-sdk/client-s3";
 import { TRPCError } from "@trpc/server";
-import { and, eq } from "drizzle-orm";
+import { and, asc, eq, ilike, or } from "drizzle-orm";
 import { z } from "zod";
 
 export const slidesRouter = createTRPCRouter({
+  search: baseProcedure
+    .input(z.object({ query: z.string().trim().min(1).max(200) }))
+    .query(async ({ input }) => {
+      const terms = input.query.split(/\s+/);
+
+      try {
+        return await db
+          .select()
+          .from(slides)
+          .where(
+            and(
+              ...terms.map((term) => {
+                const pattern = `%${term.replace(/[\\%_]/g, "\\$&")}%`;
+
+                return or(
+                  ilike(slides.title, pattern),
+                  ilike(slides.description, pattern),
+                  ilike(slides.slidename, pattern),
+                  ilike(slides.people, pattern),
+                  ilike(slides.approxDate, pattern),
+                );
+              }),
+            ),
+          )
+          .orderBy(asc(slides.slidename), asc(slides.id))
+          .limit(50);
+      } catch (error) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Unable to search slides",
+        });
+      }
+    }),
   getOne: baseProcedure
     .input(z.object({ image: z.string() }))
     .query(async ({ input }) => {
