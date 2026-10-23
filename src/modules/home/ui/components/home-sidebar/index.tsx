@@ -4,8 +4,8 @@ import MainSection from "./main-section";
 
 const HomeSidebar = () => {
   return (
-    <Sidebar className="pt-16 z-40 border-none" collapsible="icon">
-      <SidebarContent className="bg-background">
+    <Sidebar className="pt-16 z-40" collapsible="icon">
+      <SidebarContent className="bg-sidebar scrollbar-thin">
         <MainSection />
       </SidebarContent>
     </Sidebar>

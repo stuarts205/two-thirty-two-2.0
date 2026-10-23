@@ -1,7 +1,10 @@
 "use client";
-import { VideoIcon } from "lucide-react";
+import { useSidebar } from "@/components/ui/sidebar";
+import { PlayIcon } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import React from "react";
+import { twMerge } from "tailwind-merge";
 
 interface VideoItemProps {
   video: any;
@@ -9,17 +12,27 @@ interface VideoItemProps {
 }
 
 const VideoItems = ({ video }: VideoItemProps) => {
+  const pathname = usePathname();
+  const { setOpenMobile } = useSidebar();
+  const href = `/videos/${video.linkId}`;
+  const isActive = pathname === href;
+
   return (
-    <div className="flex items-center gap-3 w-full cursor-pointer hover:bg-muted-foreground/10 rounded-md p-2">
-        <Link
-          href={`/videos/${video.linkId}`}
-          className="flex items-center gap-2 w-full"
-          onClick={() => {}}
-        >
-          <VideoIcon className="shrink-0 size-4" />
-          <span>{video.name}</span>
-        </Link>        
-    </div>    
+    <Link
+      href={href}
+      aria-current={isActive ? "page" : undefined}
+      title={video.name}
+      className={twMerge(
+        "flex h-8 w-full items-center gap-2 rounded-full px-2 text-sm text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+        isActive
+          ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
+          : "",
+      )}
+      onClick={() => setOpenMobile(false)}
+    >
+      <PlayIcon className="size-3.5 shrink-0" />
+      <span className="truncate">{video.name}</span>
+    </Link>
   );
 };
 

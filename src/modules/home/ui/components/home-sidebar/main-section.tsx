@@ -1,112 +1,131 @@
 "use client";
-import { Separator } from "@/components/ui/separator";
 import {
-  SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarTrigger,
+  SidebarMenuSkeleton,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { trpc } from "@/trpc/client";
-import { HomeIcon, ImageIcon, VideoIcon } from "lucide-react";
+import { ChevronRight, HomeIcon, ImageIcon, VideoIcon } from "lucide-react";
 import Link from "next/link";
-import React, { useState } from "react";
+import { usePathname } from "next/navigation";
+import React, { useEffect, useState } from "react";
+import { twMerge } from "tailwind-merge";
 import BoxItem from "./box-items";
 import { videos } from "@/lib/lookups";
 import VideoItems from "./video-items";
 
-const items = [
-  {
-    title: "Home",
-    url: "/home",
-    icon: HomeIcon,
-  },
-  {
-    title: "Slides",
-    url: "/slides",
-    icon: ImageIcon,
-    auth: true,
-  },
-  {
-    title: "Videos",
-    url: "/videos",
-    icon: VideoIcon,
-  },
-];
+type Section = "Slides" | "Videos";
 
 const MainSection = () => {
-  const [activeMenu, setActiveMenu] = useState("Home");
-  const [boxes] = trpc.boxes.getBoxes.useSuspenseQuery();
-  const videoList = videos;
+  const pathname = usePathname();
+  const { state, setOpen, setOpenMobile } = useSidebar();
+  const { data: boxes = [], isLoading } = trpc.boxes.getBoxes.useQuery();
+  const [openSections, setOpenSections] = useState<Record<Section, boolean>>({
+    Slides: pathname.startsWith("/slides"),
+    Videos: pathname.startsWith("/videos"),
+  });
+
+  useEffect(() => {
+    if (pathname.startsWith("/slides"))
+      setOpenSections((value) => ({ ...value, Slides: true }));
+    if (pathname.startsWith("/videos"))
+      setOpenSections((value) => ({ ...value, Videos: true }));
+  }, [pathname]);
+
+  const toggleSection = (section: Section) => {
+    if (state === "collapsed") {
+      setOpen(true);
+      setOpenSections((value) => ({ ...value, [section]: true }));
+      return;
+    }
+    setOpenSections((value) => ({ ...value, [section]: !value[section] }));
+  };
+
+  const sectionButton = (
+    section: Section,
+    Icon: React.ComponentType,
+    isActive: boolean,
+  ) => (
+    <SidebarMenuButton
+      tooltip={section}
+      isActive={isActive}
+      onClick={() => toggleSection(section)}
+      className="h-10 rounded-full px-3 font-medium"
+    >
+      <Icon />
+      <span>{section}</span>
+      <ChevronRight
+        className={twMerge(
+          "ml-auto size-4 text-muted-foreground transition-transform duration-200",
+          openSections[section] ? "rotate-90" : "",
+        )}
+      />
+    </SidebarMenuButton>
+  );
 
   return (
-    <div className="flex flex-col gap-4 px-4 py-2">
-      <SidebarGroup>
+    <div className="flex flex-col gap-2 py-3">
+      <SidebarGroup className="py-0">
         <SidebarGroupContent>
-          <SidebarMenu>
-            {items.map((item) => (
-              <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton
-                  tooltip={item.title}
-                  asChild
-                  isActive={activeMenu === item.title}
-                >
-                  {item.title === "Home" ? (
-                    <Link
-                      href={item.url}
-                      className="flex items-center gap-4 cursor-pointer"
-                      onClick={() => setActiveMenu(item.title)}
-                    >
-                      <item.icon />
-                      <span className="text-sm">{item.title}</span>
-                    </Link>
-                  ) : (
-                    <div
-                      className="flex items-center gap-4 cursor-pointer"
-                      onClick={() => setActiveMenu(item.title)}
-                    >
-                      <item.icon />
-                      <span className="text-sm">{item.title}</span>
-                    </div>
-                  )}
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
-          {activeMenu === "Slides" && (
-            <div className="flex flex-col gap-4">
-              <Separator />
-              <SidebarContent>
-                <SidebarMenu className="w-full py-2 mb-12 gap-4">
+          <SidebarMenu className="gap-1">
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                tooltip="Home"
+                asChild
+                isActive={pathname === "/home"}
+                className="h-10 rounded-full px-3 font-medium"
+              >
+                <Link href="/home" onClick={() => setOpenMobile(false)}>
+                  <HomeIcon />
+                  <span>Home</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              {sectionButton(
+                "Slides",
+                ImageIcon,
+                pathname.startsWith("/slides") && !openSections.Slides,
+              )}
+              {openSections.Slides && (
+                <SidebarMenuSub className="mr-0 mt-1 gap-0.5 pr-0">
+                  {isLoading &&
+                    Array.from({ length: 4 }).map((_, index) => (
+                      <SidebarMenuSubItem key={index}>
+                        <SidebarMenuSkeleton />
+                      </SidebarMenuSubItem>
+                    ))}
                   {boxes.map((item) => (
-                    <SidebarMenuItem
-                      key={item.id}
-                      className="w-full flex flex-col gap-4 px-3"
-                    >
+                    <SidebarMenuSubItem key={item.id}>
                       <BoxItem item={item} />
-                    </SidebarMenuItem>
+                    </SidebarMenuSubItem>
                   ))}
-                </SidebarMenu>
-              </SidebarContent>
-            </div>
-          )}
-          {activeMenu === "Videos" && (
-            <div className="flex flex-col gap-4">
-              <Separator />
-              <SidebarContent>
-                <SidebarMenu className="w-full py-2 mb-12 gap-2">
-                  {videoList.map((video) => (
-                    <SidebarMenuItem key={video.linkId}>
+                </SidebarMenuSub>
+              )}
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              {sectionButton(
+                "Videos",
+                VideoIcon,
+                pathname.startsWith("/videos") && !openSections.Videos,
+              )}
+              {openSections.Videos && (
+                <SidebarMenuSub className="mr-0 mt-1 gap-0.5 pr-0">
+                  {videos.map((video) => (
+                    <SidebarMenuSubItem key={video.linkId}>
                       <VideoItems video={video} />
-                    </SidebarMenuItem>
+                    </SidebarMenuSubItem>
                   ))}
-                </SidebarMenu>
-              </SidebarContent>
-            </div>
-          )}
+                </SidebarMenuSub>
+              )}
+            </SidebarMenuItem>
+          </SidebarMenu>
         </SidebarGroupContent>
       </SidebarGroup>
     </div>

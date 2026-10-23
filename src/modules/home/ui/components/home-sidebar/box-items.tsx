@@ -1,9 +1,9 @@
 "use client";
-import { BoxesIcon, BoxIcon, ChevronRight } from "lucide-react";
+import { BoxesIcon, ChevronRight } from "lucide-react";
+import { usePathname } from "next/navigation";
 import React, { useState } from "react";
 import { twMerge } from "tailwind-merge";
 import CubeSection from "./cube-section";
-import { trpc } from "@/trpc/client";
 
 interface BoxItemProps {
   item: any;
@@ -11,29 +11,35 @@ interface BoxItemProps {
 }
 
 const BoxItem = ({ item }: BoxItemProps) => {
-  const [showCubes, setShowCubes] = useState(false);
+  const pathname = decodeURIComponent(usePathname());
+  const isCurrentBox = pathname.startsWith(`/slides/${item.title}_`);
+  const [showCubes, setShowCubes] = useState(isCurrentBox);
+
   return (
     <div>
-      <div
-        className="flex items-center justify-between w-full cursor-pointer hover:bg-muted-foreground/10 rounded-md"
+      <button
+        type="button"
+        aria-expanded={showCubes}
+        className={twMerge(
+          "flex h-8 w-full items-center gap-2 rounded-full px-2 text-left text-sm text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+          isCurrentBox ? "font-medium text-sidebar-accent-foreground" : "",
+        )}
         onClick={() => setShowCubes((val) => !val)}
       >
-        <div className="text-sm flex items-center gap-2 pl-1 py-0.5">
-          <BoxesIcon className="size-4 text-md md:text-sm" />
-          <span className="text-md md:text-sm">{item.title}</span>
-        </div>
+        <BoxesIcon className="size-4 shrink-0" />
+        <span className="flex-1 truncate">{item.title}</span>
         <ChevronRight
           className={twMerge(
-            "text-muted-foreground size-4",
-            showCubes ? "rotate-90" : ""
+            "size-3.5 shrink-0 text-muted-foreground transition-transform duration-200",
+            showCubes ? "rotate-90" : "",
           )}
         />
-      </div> 
+      </button>
       {showCubes && (
-          <div className="overflow-hidden transition-all duration-300 w-full h-full flex gap-2 pl-4 mt-3">
-            <CubeSection key={item.title} box={item.title} />
-          </div>
-        )}         
+        <div className="ml-4 mt-0.5 border-l border-sidebar-border pl-2">
+          <CubeSection key={item.title} box={item.title} />
+        </div>
+      )}
     </div>
   );
 };
