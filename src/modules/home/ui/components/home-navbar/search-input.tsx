@@ -52,11 +52,15 @@ const SearchInput = () => {
         className="relative flex w-full min-w-0 max-w-[600px]"
       >
         <div className="relative w-full min-w-0">
+          <SearchIcon
+            aria-hidden
+            className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+          />
           <input
             type="search"
             aria-label="Search slides"
             aria-controls={open ? resultsId : undefined}
-            placeholder="Search..."
+            placeholder="Search people, places, dates..."
             maxLength={200}
             value={value}
             onChange={(event) => {
@@ -67,24 +71,24 @@ const SearchInput = () => {
             onFocus={() => {
               if (value.trim()) setOpen(true);
             }}
-            className="w-full pl-4 py-2 pr-12 rounded-l-full border focus:outline-none focus:border-blue-500"
+            className="h-10 w-full rounded-full border border-transparent bg-muted pl-11 pr-24 text-sm transition-colors placeholder:text-muted-foreground focus:border-primary/40 focus:bg-background focus:outline-none focus:ring-4 focus:ring-primary/10 [&::-webkit-search-cancel-button]:hidden"
           />
+          <button
+            type="submit"
+            aria-label="Search slides"
+            title="Search slides"
+            disabled={!value.trim()}
+            className="absolute right-1 top-1/2 hidden h-8 -translate-y-1/2 rounded-full bg-primary px-4 text-xs font-medium text-primary-foreground transition hover:bg-primary/90 disabled:opacity-0 sm:block"
+          >
+            Search
+          </button>
         </div>
-        <button
-          type="submit"
-          aria-label="Search slides"
-          title="Search slides"
-          disabled={!value.trim()}
-          className="px-3 sm:px-5 py-2.5 bg-gray-100 border-l-0 rounded-r-full hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <SearchIcon className="size-5" />
-        </button>
         {open && (
           <div
             id={resultsId}
             aria-label="Slide search results"
             aria-busy={isSearching}
-            className="absolute top-full left-0 right-0 mt-2 max-h-[min(70vh,36rem)] overflow-y-auto rounded-md border bg-white shadow-lg"
+            className="absolute top-full left-0 right-0 mt-2 max-h-[min(70vh,36rem)] overflow-y-auto rounded-2xl border bg-popover p-1 shadow-xl"
           >
             <p
               role="status"
@@ -108,7 +112,7 @@ const SearchInput = () => {
                         setSelectedIndex(index);
                         setOpen(false);
                       }}
-                      className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-gray-100 focus-visible:bg-gray-100 focus-visible:outline-none"
+                      className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left hover:bg-muted focus-visible:bg-muted focus-visible:outline-none"
                     >
                       <Image
                         src={slide.slidename}
@@ -116,7 +120,7 @@ const SearchInput = () => {
                         width={64}
                         height={48}
                         unoptimized
-                        className="h-12 w-16 shrink-0 rounded-sm object-contain"
+                        className="h-12 w-16 shrink-0 rounded-lg bg-muted object-cover"
                       />
                       <span className="min-w-0 flex-1 space-y-1">
                         <span className="block break-words text-sm font-medium">

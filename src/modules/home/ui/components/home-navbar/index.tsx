@@ -130,42 +130,38 @@ const HomeNavbar = () => {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 h-16 bg-white flex items-center px-2 pr-3 sm:pr-5 z-50">
+    <nav className="fixed top-0 left-0 right-0 h-16 border-b bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/70 flex items-center px-2 pr-3 sm:px-3 sm:pr-5 z-50">
       <div className="flex items-center gap-2 sm:gap-4 w-full min-w-0">
-        <div className="flex items-center flex-shrink-0">
-          <SidebarTrigger />
+        <div className="flex items-center gap-1 flex-shrink-0">
+          <SidebarTrigger className="size-9 rounded-full" />
           <Link
             prefetch
-            href="/"
+            href="/home"
             aria-label="Smith Family Slides home"
-            className="flex items-center gap-1"
+            className="flex items-center gap-3 rounded-full py-1 pl-1 pr-2 sm:pr-3 hover:bg-muted transition-colors"
           >
-            <div className="flex items-center gap-1 p-2 sm:p-4">
-              <Image
-                src="/images/default.jpg"
-                alt="logo"
-                width={40}
-                height={40}
-                className="rounded-sm"
-              />
-              <p className="hidden md:block text-2xl px-2 font-semibold tracking-tighter">
-                Smith Family Slides
-              </p>
-            </div>
+            <Image
+              src="/images/default.jpg"
+              alt="logo"
+              width={36}
+              height={36}
+              className="size-9 rounded-full object-cover ring-2 ring-background shadow-sm"
+            />
+            <p className="hidden md:block text-lg font-semibold tracking-tight">
+              Smith Family Slides
+            </p>
           </Link>
         </div>
-        <div className="flex flex-1 min-w-0 justify-center max-w-[7000px] mx-auto">
-          <div className="flex w-full max-w-[700px] min-w-0 items-center justify-center gap-2">
-            <div className="min-w-0 max-w-[600px] flex-1">
+        <div className="flex flex-1 min-w-0 justify-center">
+          <div className="flex w-full max-w-[720px] min-w-0 items-center justify-center gap-2 sm:gap-3">
+            <div className="min-w-0 flex-1">
               <SearchInput />
             </div>
             <Popover open={isLoginOpen} onOpenChange={handleUploadOpenChange}>
               <PopoverTrigger asChild>
                 <Button
                   type="button"
-                  variant="outline"
-                  size="icon"
-                  className="shrink-0"
+                  className="shrink-0 rounded-full size-10 p-0 sm:w-auto sm:px-4 shadow-sm"
                   aria-label={
                     isUploading ? "Uploading photos" : "Upload photos"
                   }
@@ -178,13 +174,16 @@ const HomeNavbar = () => {
                   ) : (
                     <Upload />
                   )}
+                  <span className="hidden sm:inline">
+                    {isUploading ? "Uploading..." : "Upload"}
+                  </span>
                 </Button>
               </PopoverTrigger>
               <PopoverContent
                 side="bottom"
                 align="end"
                 sideOffset={8}
-                className="z-[60] w-80"
+                className="z-[60] w-80 rounded-2xl p-5 shadow-xl"
               >
                 <form onSubmit={handleLogin} className="grid gap-4">
                   <div className="space-y-1">

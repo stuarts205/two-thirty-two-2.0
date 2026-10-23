@@ -85,7 +85,7 @@ const SaveSlideInfoModal = ({
 
   return (
     <ResponsiveModal
-      title="Update this silde information"
+      title="Update this slide information"
       open={open}
       onOpenChange={onOpenChange}
     >
@@ -144,10 +144,17 @@ const SaveSlideInfoModal = ({
               </FormItem>
             )}
           />
-          <div className="flex justify-end">
-            <Button type="submit">Save</Button>
-            <Button variant="ghost" type="button" onClick={handleCancel}>
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="ghost"
+              type="button"
+              className="rounded-full"
+              onClick={handleCancel}
+            >
               Cancel
+            </Button>
+            <Button type="submit" className="rounded-full px-6">
+              Save
             </Button>
           </div>
         </form>
