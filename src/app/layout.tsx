@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { TRPCProvider } from "@/trpc/client";
 import { SidebarProvider } from "./sidebar-context";
+import { Toaster } from "@/components/ui/sonner";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -33,6 +34,7 @@ export default function RootLayout({
         <SidebarProvider>
           <TRPCProvider>{children}</TRPCProvider>
         </SidebarProvider>
+        <Toaster />
       </body>
     </html>
   );
